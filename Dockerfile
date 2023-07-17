@@ -7,7 +7,7 @@ ARG PROFILE
 COPY dist/  /usr/share/nginx/html/
 
 # 用本地配置文件来替换nginx镜像里的默认配置
-COPY nginx/nginx-${PROFILE}.conf /etc/nginx/nginx.conf
+COPY nginx.conf /etc/nginx/nginx.conf
 
 # 说明作用 不起实际作用
 EXPOSE 80
