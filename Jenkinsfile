@@ -5,8 +5,6 @@ pipeline{
       IMAGE_NAME = "ruoyi-ui"
       // 工作目录
       WS = "${WORKSPACE}"
-      // 后台项目镜像名称
-      API_IMAGE_NAME = "ruoyi-admin"
       // 自定义的构建参数
       PROFILE = "prod"
     }
@@ -44,12 +42,24 @@ pipeline{
         }
 
         stage('4.部署'){
-            // 删除容器和虚悬镜像
             steps {
-               sh 'pwd && ls -alh'
-               sh 'docker rm -f ${IMAGE_NAME} || true && docker rmi $(docker images -q -f dangling=true) || true'
-               sh 'docker run -d -p 8889:80 --name ${IMAGE_NAME} --link ruoyi-admin:ruoyi-admin ${IMAGE_NAME}'
-            }
+                 sh 'pwd && ls -alh'
+                    // 删除旧的容器
+                 sh 'docker rm -f ${IMAGE_NAME} || true'
+                    // 复制静态文件到 Nginx 服务器的根目录
+                 sh 'docker cp ${WS}/dist/. nginx:/usr/share/nginx/html'
         }
+}
+
+        
+
+        // stage('4.部署'){
+        //     // 删除容器和虚悬镜像
+        //     steps {
+        //        sh 'pwd && ls -alh'
+        //        sh 'docker rm -f ${IMAGE_NAME} || true && docker rmi $(docker images -q -f dangling=true) || true'
+        //        sh 'docker run -d -p 8889:80 --name ${IMAGE_NAME} --link ruoyi-admin:ruoyi-admin ${IMAGE_NAME}'
+        //     }
+        // }
     }
 }
