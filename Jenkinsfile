@@ -37,7 +37,7 @@ pipeline{
         stage('3.打包'){
             steps {
                sh 'pwd && ls -alh'
-               sh 'docker build -t ${IMAGE_NAME} .'
+               sh 'docker build --build-arg PROFILE=${PROFILE} -t ${IMAGE_NAME} .'
             }
         }
 
@@ -45,7 +45,7 @@ pipeline{
             steps {
                  sh 'pwd && ls -alh'
                  // 复制静态文件到 Nginx 服务器的根目录
-                 sh 'docker cp ${WS}/dist/. ruoyi-nginx:/www/web/ruoyi'
+                 sh 'docker rm -f ${IMAGE_NAME} || true && docker rmi $(docker images -q -f dangling=true) || true'
                  //  TODO:
                  sh 'docker run -d -p 8889:80 --name ${IMAGE_NAME} --link ruoyi-admin:ruoyi-admin ${IMAGE_NAME}'
         }
