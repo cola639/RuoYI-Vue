@@ -44,11 +44,11 @@ pipeline{
         stage('4.部署'){
             steps {
                  sh 'pwd && ls -alh'
-                    // 删除容器和虚悬镜像
+                 // 删除容器和虚悬镜像
                  // sh 'docker rm -f ${IMAGE_NAME} || true'
-                    // 复制静态文件到 Nginx 服务器的根目录
+                 // 复制静态文件到 Nginx 服务器的根目录
                  sh 'docker cp ${WS}/dist/. ruoyi-nginx:/www/web/ruoyi'
-                    //  TODO:
+                 //  TODO:
                  // sh 'docker run -d -p 8889:80 --name ${IMAGE_NAME} --link ruoyi-admin:ruoyi-admin ${IMAGE_NAME}'
         }
         }
