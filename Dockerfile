@@ -10,8 +10,8 @@ COPY dist/  /usr/share/nginx/html/
 COPY ruoyi_nginx.conf /etc/nginx/nginx.conf
 
 # 将 SSL 证书和密钥复制到镜像中
-COPY /ssl/ruoyi-cert.pem /etc/ssl/certs/
-COPY /ssl/ruoyi-key.pem /etc/ssl/private/
+COPY ruoyi-cert.pem /etc/ssl/certs/
+COPY ruoyi-key.pem /etc/ssl/private/
 
 # 容器内部运行的端口 声明不起实际作用
 EXPOSE 80

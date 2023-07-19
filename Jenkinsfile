@@ -36,8 +36,8 @@ pipeline{
         stage('3.Build'){
             steps {
                sh 'pwd && ls -alh'
-              // sh 'sudo cp /www/ssl/ruoyi-cert.pem ${WS}' // 拷贝证书到工作目录
-              // sh 'sduo cp /www/ssl/ruoyi-key.pem ${WS}' // 拷贝密钥到工作目录
+               sh 'sudo cp /www/ssl/ruoyi-cert.pem ${WS}' // 拷贝证书到工作目录
+               sh 'sduo cp /www/ssl/ruoyi-key.pem ${WS}' // 拷贝密钥到工作目录
                sh 'docker build -t ${IMAGE_NAME} .'
             }
         }
