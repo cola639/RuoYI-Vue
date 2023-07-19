@@ -47,8 +47,8 @@ pipeline{
                  sh 'pwd && ls -alh'
                  sh 'docker rm -f ${IMAGE_NAME} || true && docker rmi $(docker images -q -f dangling=true) || true'
                  //  向外暴露端口再由内部Nginx代理到静态文件
-                 sh 'docker run -d -p 8889:80 --name ${IMAGE_NAME} --link ruoyi-admin:ruoyi-admin ${IMAGE_NAME}'
-        }
+                 sh 'docker run -d -p 8889:80 -p 443:443 --name ${IMAGE_NAME} --link ruoyi-admin:ruoyi-admin ${IMAGE_NAME}'
+            }
         }
 
     }

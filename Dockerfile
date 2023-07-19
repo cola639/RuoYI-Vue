@@ -15,6 +15,7 @@ COPY /ssl/ruoyi-key.pem /etc/ssl/private/
 
 # 容器内部运行的端口 声明不起实际作用
 EXPOSE 80
+EXPOSE 443
 
 # 以前台形式持续运行
 CMD ["nginx", "-g", "daemon off;"]
