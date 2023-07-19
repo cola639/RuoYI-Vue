@@ -9,6 +9,7 @@ COPY dist/  /usr/share/nginx/html/
 # 用本地配置文件来替换nginx镜像里的默认配置
 COPY ruoyi_nginx.conf /etc/nginx/nginx.conf
 
+# 容器内部运行的端口 声明不起实际作用
 EXPOSE 80
 
 # 以前台形式持续运行

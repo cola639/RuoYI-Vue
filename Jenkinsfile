@@ -9,10 +9,9 @@ pipeline{
       PROFILE = "prod"
     }
 
-    //定义流水线的加工流程
+    // 定义流水线的加工流程
     stages {
-        //流水线的所有阶段
-        stage('1.环境检查'){
+       stage('1.Enviroment'){
             steps {
                sh 'pwd && ls -alh'
                sh 'printenv'
@@ -21,10 +20,10 @@ pipeline{
             }
         }
 
-        stage('2.编译'){
+        stage('2.Compile'){
             agent {
                 docker {
-                    image 'node:12-alpine'
+                    image 'node:14-alpine'
                  }
             }
             steps {
@@ -34,19 +33,18 @@ pipeline{
             }
         }
 
-        stage('3.打包'){
+        stage('3.Build'){
             steps {
                sh 'pwd && ls -alh'
-               sh 'docker build --build-arg PROFILE=${PROFILE} -t ${IMAGE_NAME} .'
+               sh 'docker build --build -t ${IMAGE_NAME} .'
             }
         }
 
-        stage('4.部署'){
+        stage('4.Deploy'){
             steps {
                  sh 'pwd && ls -alh'
-                 // 复制静态文件到 Nginx 服务器的根目录
                  sh 'docker rm -f ${IMAGE_NAME} || true && docker rmi $(docker images -q -f dangling=true) || true'
-                 //  TODO:
+                 //  向外暴露端口再由内部Nginx代理到静态文件
                  sh 'docker run -d -p 8889:80 --name ${IMAGE_NAME} --link ruoyi-admin:ruoyi-admin ${IMAGE_NAME}'
         }
         }
