@@ -57,3 +57,19 @@ export function getCodeImg() {
     timeout: 20000
   })
 }
+
+// Gitee授权登录
+export function getGiteeCode() {
+  return request({
+    url: '/PreLoginByGitee',
+    method: 'get'
+  })
+}
+
+export function loginGitee(data) {
+  return request({
+    url: '/loginByGitee',
+    method: 'post',
+    data
+  })
+}
