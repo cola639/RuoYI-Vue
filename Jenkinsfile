@@ -41,7 +41,7 @@ pipeline{
                sh 'docker build -t ${IMAGE_NAME} .'
             }
         }
-
+x
         stage('4.Deploy'){
             steps {
                  sh 'pwd && ls -alh'

@@ -28,3 +28,11 @@ npm run build:stage
 # 构建生产环境
 npm run build:prod
 ```
+
+## 部署流程
+
+```
+    准备材料: 腾讯SSL证书 https://console.cloud.tencent.com/ssl
+
+
+```
