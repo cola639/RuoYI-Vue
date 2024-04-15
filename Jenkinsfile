@@ -1,8 +1,11 @@
+// Jenkinsfile先于Docker 并执行Dockerfile配置
 pipeline{
     agent any
     environment {
+      // 前后端互通网络组  
+      NETWORK = "ruoyi"  
       // 镜像名称
-      IMAGE_NAME = "ruoyi-ui"
+      IMAGE_NAME = "ruoyi-vue"
       // 工作目录
       WS = "${WORKSPACE}"
       // 自定义的构建参数
@@ -17,6 +20,7 @@ pipeline{
                sh 'printenv'
                sh 'docker version'
                sh 'git --version'
+               sh 'docker network create ${NETWORK} || true'
             }
         }
 
@@ -47,7 +51,7 @@ pipeline{
                  sh 'pwd && ls -alh'
                  sh 'docker rm -f ${IMAGE_NAME} || true && docker rmi $(docker images -q -f dangling=true) || true'
                  //  向外暴露端口再由内部Nginx代理到静态文件
-                 sh 'docker run -d -p 8889:80 -p 443:443 --name ${IMAGE_NAME} --link ruoyi-admin:ruoyi-admin ${IMAGE_NAME}'
+                 sh 'docker run -d --net ${NETWORK} -p 8888:80 -p 443:443 --name ${IMAGE_NAME} ${IMAGE_NAME}'
             }
         }
 
