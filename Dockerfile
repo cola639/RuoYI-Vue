@@ -1,7 +1,7 @@
 FROM nginx:1.22
 
 # 构建参数,在Jenkinsfile中构建镜像时定义
-ARG PROFILE
+# ARG PROFILE
 
 # 将dist文件中的内容复制到 `/usr/share/nginx/html` 这个目录下面
 COPY dist/ /usr/share/nginx/html/
@@ -14,8 +14,7 @@ COPY dist/ /usr/share/nginx/html/
 # COPY ruoyi-key.pem /etc/ssl/private/
 
 # 容器内部运行的端口 声明不起实际作用
-EXPOSE 80
-EXPOSE 443
+EXPOSE 80 443
 
 # 以前台形式持续运行
 CMD ["nginx", "-g", "daemon off;"]

@@ -11,6 +11,8 @@ pipeline {
         WS = "${WORKSPACE}"
         // 自定义的构建参数
         PROFILE = 'prod'
+        // 放在宿主机nginx
+        NGINX = 'ruoyi'
     }
 
     // 定义流水线的加工流程
@@ -51,8 +53,14 @@ pipeline {
             steps {
                 sh 'pwd && ls -alh'
                 sh 'docker rm -f ${IMAGE_NAME} || true && docker rmi $(docker images -q -f dangling=true) || true'
-                //  向外暴露端口再由内部Nginx代理到静态文件
-                sh 'docker run -d --net ${NETWORK} -p 8888:80 -p 443:443 --name ${IMAGE_NAME} ${IMAGE_NAME}'
+                sh """
+                     docker run -d --net ${NETWORK} -p 8888:80 -p 443:443 \
+                                  --name ${IMAGE_NAME} \
+                           -v /www/conf/${NGINX}.conf:/etc/nginx/nginx.conf \
+                           -v /www/ssl/${NGINX}/${NGINX}.pem:/etc/ssl/certs/${NGINX}.pem \
+                           -v /www/ssl/${NGINX}/${NGINX}.pem:/etc/ssl/private/${NGINX}.key \
+                            ${IMAGE_NAME}
+                """
             }
         }
     }
