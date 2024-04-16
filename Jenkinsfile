@@ -57,7 +57,7 @@ pipeline {
                                   --name ${IMAGE_NAME} \
                            -v /www/conf/${NGINX}.conf:/etc/nginx/nginx.conf \
                            -v /www/ssl/${NGINX}/${NGINX}.pem:/etc/ssl/certs/${NGINX}.pem \
-                           -v /www/ssl/${NGINX}/${NGINX}.pem:/etc/ssl/private/${NGINX}.key \
+                           -v /www/ssl/${NGINX}/${NGINX}.key:/etc/ssl/private/${NGINX}.key \
                             ${IMAGE_NAME}
                 """
             }
