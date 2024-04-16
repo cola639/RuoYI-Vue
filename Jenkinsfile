@@ -53,7 +53,7 @@ pipeline {
                 sh """
                     docker run -d --net ${NETWORK} -p 8888:81 -p 443:443 \\
                       --name ${IMAGE_NAME} \\
-                      -v /www/conf/ruoyi.conf:/etc/nginx/nginx.conf \\
+                      -v /www/nginx/ruoyi.conf:/etc/nginx/nginx.conf \\
                       ${IMAGE_NAME}
                    """
             }
