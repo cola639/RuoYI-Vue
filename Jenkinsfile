@@ -23,7 +23,6 @@ pipeline {
                 sh 'printenv'
                 sh 'docker version'
                 sh 'git --version'
-                sh 'docker network create ${NETWORK} || true'
             }
         }
 
@@ -54,7 +53,7 @@ pipeline {
                 sh 'pwd && ls -alh'
                 sh 'docker rm -f ${IMAGE_NAME} || true && docker rmi $(docker images -q -f dangling=true) || true'
                 sh """
-                     docker run -d --net ${NETWORK} -p 8888:80 -p 443:443 \
+                     docker run -d --net ${NETWORK} -p 8888:81 -p 443:443 \
                                   --name ${IMAGE_NAME} \
                            -v /www/conf/${NGINX}.conf:/etc/nginx/nginx.conf \
                            -v /www/ssl/${NGINX}/${NGINX}.pem:/etc/ssl/certs/${NGINX}.pem \
