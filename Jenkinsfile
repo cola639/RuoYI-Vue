@@ -42,8 +42,6 @@ pipeline {
         stage('3.Build') {
             steps {
                 sh 'pwd && ls -alh'
-                //  sh 'cp /ssl/ruoyi-cert.pem ${WS}' // 拷贝证书到工作目录
-                //  sh 'cp /ssl/ruoyi-key.pem ${WS}' // 拷贝密钥到工作目录
                 sh 'docker build -t ${IMAGE_NAME} .'
             }
         }
@@ -52,8 +50,13 @@ pipeline {
             steps {
                 sh 'pwd && ls -alh'
                 sh 'docker rm -f ${IMAGE_NAME} || true && docker rmi $(docker images -q -f dangling=true) || true'
-                sh "docker run -d --net ${NETWORK} -p 8888:81 -p 443:443 --name ${IMAGE_NAME} ${IMAGE_NAME}"
-             }
+                sh """
+                    docker run -d --net ${NETWORK} -p 8888:81 -p 443:443 \\
+                      --name ${IMAGE_NAME} \\
+                      -v /www/conf/ruoyi.conf:/etc/nginx/nginx.conf \\
+                      ${IMAGE_NAME}
+                   """
+            }
         }
     }
 }
