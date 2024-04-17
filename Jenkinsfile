@@ -50,12 +50,13 @@ pipeline {
             steps {
                 sh 'pwd && ls -alh'
                 sh 'docker rm -f ${IMAGE_NAME} || true && docker rmi $(docker images -q -f dangling=true) || true'
-                sh """
-                    docker run -d --net ${NETWORK} -p 8888:81 -p 443:443 \\
-                      --name ${IMAGE_NAME} \\
-                      -v /www/nginx/ruoyi.conf:/etc/nginx/nginx.conf \\
-                      ${IMAGE_NAME}
-                   """
+                sh 'docker run -d --net ${NETWORK} -p 8888:80 -p 443:443 --name ${IMAGE_NAME} ${IMAGE_NAME}'
+                // sh """
+                //     docker run -d --net ${NETWORK} -p 8888:81 -p 443:443 \\
+                //       --name ${IMAGE_NAME} \\
+                //       -v /www/nginx/ruoyi.conf:/etc/nginx/nginx.conf \\
+                //       ${IMAGE_NAME}
+                //    """
             }
         }
     }
