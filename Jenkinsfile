@@ -1,62 +1,62 @@
 /* groovylint-disable CompileStatic, DuplicateStringLiteral, GStringExpressionWithinString, LineLength */
-// Jenkinsfile先于Docker 并执行Dockerfile配置
+// Jenkinsfile configuration disabling specific lint rules for cleaner script
+
+// Defines a pipeline block that contains the entire continuous delivery pipeline
 pipeline {
-    agent any
+    agent any  // Specifies that this pipeline can run on any available agent
+
+    // Defines environment variables that are accessible within the pipeline
     environment {
-        // 前后端互通网络组
-        NETWORK = 'ruoyi'
-        // 镜像名称
-        IMAGE_NAME = 'ruoyi-vue'
-        // 工作目录
-        WS = "${WORKSPACE}"
-        // 自定义的构建参数
-        PROFILE = 'prod'
-        // 放在宿主机nginx
-        NGINX = 'ruoyi'
+        NETWORK = 'ruoyi'  // Network name for Docker to enable networking among containers
+        IMAGE_NAME = 'ruoyi-vue'  // Name of the Docker image to be built
+        WS = "${WORKSPACE}"  // Shortcut for the Jenkins workspace variable
+        PROFILE = 'prod'  // Build profile, typically used to differentiate environments
+        NGINX = 'ruoyi'  // Nginx container name, used for setting nginx configuration
     }
 
-    // 定义流水线的加工流程
+    // Contains all the stages in this pipeline
     stages {
-        stage('1.Enviroment') {
+        stage('1.Enviroment') {  // First stage: Environment Setup
             steps {
-                sh 'pwd && ls -alh'
-                sh 'printenv'
-                sh 'docker version'
-                sh 'git --version'
+                sh 'pwd && ls -alh'  // Print the current working directory and list all files in detailed format
+                sh 'printenv'  // Print all the environment variables available on the Jenkins agent
+                sh 'docker version'  // Check the Docker version to verify Docker is correctly installed
+                sh 'git --version'  // Check Git version to verify Git is correctly installed
             }
         }
 
-        stage('2.Compile') {
+        stage('2.Compile') {  // Second stage: Compile the application
             agent {
-                docker {
-                    image 'node:14-alpine'
+                docker {  // Use a Docker agent with the specified image
+                    image 'node:14-alpine'  // Specifies the Docker image to use for this stage
                 }
             }
             steps {
-                sh 'pwd && ls -alh'
-                sh 'node -v'
-                sh 'cd ${WS} && npm install --registry=https://registry.npmmirror.com --no-fund && npm run build:${PROFILE}'
+                sh 'pwd && ls -alh'  // Print the current directory and list files to debug path issues
+                sh 'node -v'  // Display Node.js version to verify the correct node environment
+                sh 'cd ${WS} && npm install --registry=https://registry.npmmirror.com --no-fund && npm run build:${PROFILE}'  // Navigate to workspace, install dependencies, and build the project
             }
         }
 
-        stage('3.Build') {
+        stage('3.Build') {  // Third stage: Build the Docker image
             steps {
-                sh 'pwd && ls -alh'
-                sh 'docker build -t ${IMAGE_NAME} .'
+                sh 'pwd && ls -alh'  // Print the current directory and list files for debugging
+                sh 'docker build -t ${IMAGE_NAME} .'  // Build Docker image using the Dockerfile in the current directory
             }
         }
 
-        stage('4.Deploy') {
+        stage('4.Deploy') {  // Fourth stage: Deploy the application
             steps {
-                sh 'pwd && ls -alh'
+                sh 'pwd && ls -alh'  // Debugging command to print current directory and list files
+                // Cleanup old containers and dangling images to prevent conflicts and save space
                 sh 'docker rm -f ${IMAGE_NAME} || true && docker rmi $(docker images -q -f dangling=true) || true'
-                sh 'docker run -d --net ${NETWORK} -p 8888:80 --name ${IMAGE_NAME} ${IMAGE_NAME}'
-                // sh """
-                //     docker run -d --net ${NETWORK} -p 8888:81 -p 443:443 \\
-                //       --name ${IMAGE_NAME} \\
-                //       -v /www/nginx/ruoyi.conf:/etc/nginx/nginx.conf \\
-                //       ${IMAGE_NAME}
-                //    """
+                // Run the Docker container in detached mode with network settings and port mapping
+                sh """
+                    docker run -d --net ${NETWORK} -p 8888:80 \\
+                      --name ${IMAGE_NAME} \\
+                      -v /www/docker/${NGINX}/${NGINX}.conf:/etc/nginx/nginx.conf \\
+                      ${IMAGE_NAME}
+                   """
             }
         }
     }
