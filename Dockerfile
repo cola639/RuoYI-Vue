@@ -7,7 +7,7 @@ FROM nginx:1.22
 COPY dist/ /usr/share/nginx/html/
 
 # 用本地配置文件来替换nginx镜像里的默认配置
-# COPY ruoyi_nginx.conf /etc/nginx/nginx.conf
+COPY ruoyi_nginx.conf /etc/nginx/nginx.conf
 
 # 将 SSL 证书和密钥复制到镜像中
 # COPY ruoyi-cert.pem /etc/ssl/certs/
