@@ -57,7 +57,7 @@ pipeline {
                       -v /www/docker/${NGINX}/${NGINX}.conf:/etc/nginx/nginx.conf \\
                       ${IMAGE_NAME}
                    """
-                //  If 443
+                //  If 443 please place nginx configuration and certificate in the host/www/Docker/${NGINX} directory
                 //    sh """
                 //     docker run -d --net ${NETWORK} -p 8888:80 \\
                 //       --name ${IMAGE_NAME} \\
