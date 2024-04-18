@@ -57,6 +57,15 @@ pipeline {
                       -v /www/docker/${NGINX}/${NGINX}.conf:/etc/nginx/nginx.conf \\
                       ${IMAGE_NAME}
                    """
+                //  If 443
+                //    sh """
+                //     docker run -d --net ${NETWORK} -p 8888:80 \\
+                //       --name ${IMAGE_NAME} \\
+                //       -v /www/docker/${NGINX}/${NGINX}.conf:/etc/nginx/nginx.conf \\
+                //       -v /www/docker/${NGINX}/${NGINX}.pem:/etc/ssl/certs/${NGINX}.pem \\
+                //       -v /www/docker/${NGINX}/${NGINX}.key:/etc/ssl/private/${NGINX}.key \\
+                //       ${IMAGE_NAME}
+                //    """
             }
         }
     }
