@@ -51,21 +51,21 @@ pipeline {
                 // Cleanup old containers and dangling images to prevent conflicts and save space
                 sh 'docker rm -f ${IMAGE_NAME} || true && docker rmi $(docker images -q -f dangling=true) || true'
                 // Run the Docker container in detached mode with network settings and port mapping
+                // sh """
+                //     docker run -d --net ${NETWORK} -p 8888:80 \\
+                //       --name ${IMAGE_NAME} \\
+                //       -v /www/docker/${NGINX}/${NGINX}.conf:/etc/nginx/nginx.conf \\
+                //       ${IMAGE_NAME}
+                //    """
+                //  If 443 please place nginx configuration and certificate in the host/www/Docker/${NGINX} directory
                 sh """
                     docker run -d --net ${NETWORK} -p 8888:80 \\
                       --name ${IMAGE_NAME} \\
                       -v /www/docker/${NGINX}/${NGINX}.conf:/etc/nginx/nginx.conf \\
+                      -v /www/docker/${NGINX}/${NGINX}.pem:/etc/ssl/certs/${NGINX}.pem \\
+                      -v /www/docker/${NGINX}/${NGINX}.key:/etc/ssl/private/${NGINX}.key \\
                       ${IMAGE_NAME}
                    """
-                //  If 443 please place nginx configuration and certificate in the host/www/Docker/${NGINX} directory
-                //    sh """
-                //     docker run -d --net ${NETWORK} -p 8888:80 \\
-                //       --name ${IMAGE_NAME} \\
-                //       -v /www/docker/${NGINX}/${NGINX}.conf:/etc/nginx/nginx.conf \\
-                //       -v /www/docker/${NGINX}/${NGINX}.pem:/etc/ssl/certs/${NGINX}.pem \\
-                //       -v /www/docker/${NGINX}/${NGINX}.key:/etc/ssl/private/${NGINX}.key \\
-                //       ${IMAGE_NAME}
-                //    """
             }
         }
     }
