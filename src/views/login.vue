@@ -40,7 +40,7 @@
 </template>
 
 <script>
-import { getCodeImg, getGiteeCode, loginGitee } from '@/api/login'
+import { getCodeImg, getGiteeCode } from '@/api/login'
 import Cookies from 'js-cookie'
 import { encrypt, decrypt } from '@/utils/jsencrypt'
 import { getUrlParams } from '@/utils/index'

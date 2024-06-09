@@ -5,6 +5,7 @@
 git clone https://gitee.com/y_project/RuoYi-Vue
 
 # 进入项目目录
+node 16.x.x
 cd ruoyi-ui
 
 # 安装依赖
