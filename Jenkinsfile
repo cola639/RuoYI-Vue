@@ -62,7 +62,7 @@ pipeline {
                     docker run -d --net ${NETWORK} -p 8888:80 -p 443:443 \\
                       --name ${IMAGE_NAME} \\
                       -v /www/docker/${NGINX}/${NGINX}.pem:/etc/ssl/certs/${NGINX}.pem \\
-                      -v /www/docker/${NGINX}/${NGINX}.key:/etc/ssl/private/${NGINX}.key \\
+                      -v /www/docker/${NGINX}/${NGINX}-key.pem:/etc/ssl/private/${NGINX}-key.pem \\
                       -v /www/docker/${NGINX}/${NGINX}.conf:/etc/nginx/nginx.conf \\
                       ${IMAGE_NAME}
                    """
