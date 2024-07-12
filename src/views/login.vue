@@ -1,7 +1,8 @@
 <template>
   <div class="login">
-    <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form">
-      <h3 class="title">若依后台管理系统</h3>
+    <!-- 账号密码登录 -->
+    <el-form v-if="!isMobile" ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form">
+      <h3 class="title">admin后台管理系统</h3>
       <el-form-item prop="username">
         <el-input v-model="loginForm.username" type="text" auto-complete="off" placeholder="账号">
           <svg-icon slot="prefix" icon-class="user" class="el-input__icon input-icon" />
@@ -31,6 +32,33 @@
         </div>
       </el-form-item>
     </el-form>
+    <!-- 手机号登录 -->
+    <el-form v-if="isMobile" ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form">
+      <h3 class="title">Gavin后台管理系统</h3>
+      <el-form-item prop="mobile">
+        <el-input v-model="loginForm.mobile" type="text" auto-complete="off" placeholder="手机号">
+          <svg-icon slot="prefix" icon-class="user" class="el-input__icon input-icon" />
+        </el-input>
+      </el-form-item>
+      <el-form-item prop="verifyCode">
+        <el-input v-model="loginForm.verifyCode" auto-complete="off" placeholder="验证码" style="width: 63%">
+          <svg-icon slot="prefix" icon-class="validCode" class="el-input__icon input-icon" />
+        </el-input>
+        <div class="login-code" v-if="!computeTime">
+          <button type="button" @click="getVerify" class="pointer login-verify-code">获取验证码</button>
+        </div>
+      </el-form-item>
+      <el-checkbox v-model="loginForm.rememberMe" style="margin: 0px 0px 25px 0px">记住密码</el-checkbox>
+      <el-form-item style="width: 100%">
+        <el-button :loading="loading" size="medium" type="primary" style="width: 100%" @click.native.prevent="handleSMSLogin">
+          <span v-if="!loading" native-type="submit">登 录</span>
+          <span v-else>登 录 中...</span>
+        </el-button>
+        <div style="float: right">
+          <button class="link-type" @click.prevent="getGiteeCode">Github授权登录</button>
+        </div>
+      </el-form-item>
+    </el-form>
 
     <!--  底部  -->
     <div class="el-login-footer">
@@ -40,7 +68,7 @@
 </template>
 
 <script>
-import { getCodeImg, getGiteeCode } from '@/api/login'
+import { getCodeImg, getGiteeCode, getSmsCode } from '@/api/login'
 import Cookies from 'js-cookie'
 import { encrypt, decrypt } from '@/utils/jsencrypt'
 import { getUrlParams } from '@/utils/index'
@@ -49,19 +77,24 @@ export default {
   name: 'Login',
   data() {
     return {
+      isMobile: true,
       codeUrl: '',
       loginForm: {
         username: 'admin',
         password: 'admin123',
         rememberMe: false,
         code: '',
-        uuid: ''
+        uuid: '',
+        mobile: '',
+        verifyCode: ''
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', message: '请输入您的账号' }],
         password: [{ required: true, trigger: 'blur', message: '请输入您的密码' }],
-        code: [{ required: true, trigger: 'change', message: '请输入验证码' }]
+        code: [{ required: true, trigger: 'change', message: '请输入验证码' }],
+        mobile: [{ required: true, trigger: 'blur', message: '请输入您的手机' }]
       },
+      computeTime: false,
       loading: false,
       // 验证码开关
       captchaOnOff: true,
@@ -101,6 +134,31 @@ export default {
         }
       })
     },
+    getVerify() {
+      if (!this.computeTime) {
+        this.$refs.loginForm.validate(valid => {
+          if (valid) {
+            getSmsCode(this.loginForm.mobile).then(res => {
+              if (res.code === 200) {
+                this.$message({
+                  message: '验证码已发送',
+                  type: 'success'
+                })
+                this.loginForm.uuid = res.uuid
+                this.computeTime = 60
+                this.timer = setInterval(() => {
+                  this.computeTime--
+                  if (this.computeTime <= 0) {
+                    clearInterval(this.timer)
+                  }
+                }, 1000)
+              }
+            })
+          }
+        })
+      }
+    },
+
     getCookie() {
       const username = Cookies.get('username')
       const password = Cookies.get('password')
@@ -143,6 +201,32 @@ export default {
       const { authorizeUrl } = await getGiteeCode()
       console.log('authorizeUrl', authorizeUrl)
       window.location.href = authorizeUrl
+    },
+
+    handleSMSLogin() {
+      this.loading = true
+      if (this.loginForm.rememberMe) {
+        Cookies.set('mobile', this.loginForm.mobile, { expires: 30 })
+        Cookies.set('rememberMe', this.loginForm.rememberMe, { expires: 30 })
+      } else {
+        Cookies.remove('mobile')
+        Cookies.remove('rememberMe')
+      }
+
+      const smsLoginForm = {
+        mobile: this.loginForm.mobile,
+        smsCode: this.loginForm.verifyCode,
+        uuid: this.loginForm.uuid
+      }
+
+      this.$store
+        .dispatch('SmsLogin', smsLoginForm)
+        .then(() => {
+          this.$router.push({ path: this.redirect || '/' }).catch(() => {})
+        })
+        .catch(() => {
+          this.loading = false
+        })
     },
 
     handleCodeLogin(code, uuid) {
@@ -236,5 +320,11 @@ export default {
 }
 .login-code-img {
   height: 38px;
+}
+
+.login-verify-code {
+  height: 38px;
+  border: none;
+  background-color: #fefefe;
 }
 </style>

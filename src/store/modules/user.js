@@ -1,4 +1,4 @@
-import { login, logout, getInfo, loginGitee } from '@/api/login'
+import { login, logout, getInfo, loginGitee, smsLogin } from '@/api/login'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 
 const user = {
@@ -97,6 +97,25 @@ const user = {
             commit('SET_ROLES', [])
             commit('SET_PERMISSIONS', [])
             removeToken()
+            resolve()
+          })
+          .catch(error => {
+            reject(error)
+          })
+      })
+    },
+
+    // 短信登录
+    SmsLogin({ commit }, userInfo) {
+      const mobile = userInfo.mobile.trim()
+      const smsCode = userInfo.smsCode
+      const uuid = userInfo.uuid
+      console.log('SmsLogin', mobile, smsCode, uuid)
+      return new Promise((resolve, reject) => {
+        smsLogin(mobile, smsCode, uuid)
+          .then(res => {
+            setToken(res.token)
+            commit('SET_TOKEN', res.token)
             resolve()
           })
           .catch(error => {
