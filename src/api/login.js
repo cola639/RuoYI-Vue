@@ -59,9 +59,16 @@ export function getCodeImg() {
 }
 
 // Gitee授权登录
-export function getGiteeCode() {
+export function getGiteeCodeApi() {
   return request({
     url: '/PreLoginByGitee',
+    method: 'get'
+  })
+}
+
+export function getGithubApi() {
+  return request({
+    url: '/PreLoginByGithub',
     method: 'get'
   })
 }
@@ -69,6 +76,14 @@ export function getGiteeCode() {
 export function loginGitee(data) {
   return request({
     url: '/loginByGitee',
+    method: 'post',
+    data
+  })
+}
+
+export function loginGithub(data) {
+  return request({
+    url: '/loginByGithub',
     method: 'post',
     data
   })

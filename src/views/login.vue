@@ -1,10 +1,47 @@
 <template>
   <div class="login">
+    <!-- 手机号登录 -->
+    <el-form v-if="loginType === 'phone'" ref="mobileLoginForm" :model="mobileLoginForm" :rules="mobileLoginRules" class="login-form">
+      <h3 class="fz-font title">中后台管理系统</h3>
+      <el-form-item prop="mobile">
+        <el-input v-model="mobileLoginForm.mobile" type="text" auto-complete="off" placeholder="手机号">
+          <svg-icon slot="prefix" icon-class="user" class="el-input__icon input-icon" />
+        </el-input>
+      </el-form-item>
+      <el-form-item prop="verifyCode">
+        <el-input v-model="mobileLoginForm.verifyCode" auto-complete="off" placeholder="验证码">
+          <svg-icon slot="prefix" icon-class="validCode" class="el-input__icon input-icon" />
+          <div v-if="!computeTime" class="pointer" slot="append" @click="getVerify">获取验证码</div>
+          <div v-if="computeTime" class="pointer login-verify-code" slot="append" @click="getVerify">{{ computeTime }} S</div>
+        </el-input>
+      </el-form-item>
+      <div v-if="loginType === 'account'" class="flex-space-between mb20">
+        <el-checkbox v-model="loginForm.rememberMe">记住密码</el-checkbox>
+        <div class="pointer text-blue login-forget">忘记密码？</div>
+      </div>
+
+      <el-form-item style="width: 100%">
+        <el-button class="login-btn" :loading="loading" size="medium" style="width: 100%" @click.native.prevent="handleSMSLogin">
+          <span v-if="!loading" native-type="submit">登 录</span>
+          <span v-else>登 录 中...</span>
+        </el-button>
+      </el-form-item>
+      <div class="flex-space-around mb20">
+        <div class="pointer box" @click="switchLoginType('account')">账号密码</div>
+        <div class="pointer box">注册</div>
+      </div>
+      <el-divider>其他方式登录</el-divider>
+      <div class="flex-space-around mb20">
+        <svg-icon class="pointer" style="width: 30px; height: 30px" icon-class="github" @click="getGithubCode" />
+        <svg-icon class="pointer" style="width: 30px; height: 30px" icon-class="gitee" @click="getGiteeCode" />
+      </div>
+    </el-form>
+
     <!-- 账号密码登录 -->
-    <el-form v-if="!isMobile" ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form">
-      <h3 class="title">admin后台管理系统</h3>
+    <el-form v-if="loginType === 'account'" ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form">
+      <h3 class="fz-font title">中后台管理系统</h3>
       <el-form-item prop="username">
-        <el-input v-model="loginForm.username" type="text" auto-complete="off" placeholder="账号">
+        <el-input v-model="loginForm.username" type="text" auto-complete="off" placeholder="手机号">
           <svg-icon slot="prefix" icon-class="user" class="el-input__icon input-icon" />
         </el-input>
       </el-form-item>
@@ -21,54 +58,80 @@
           <img :src="codeUrl" @click="getCode" class="login-code-img" />
         </div>
       </el-form-item>
-      <el-checkbox v-model="loginForm.rememberMe" style="margin: 0px 0px 25px 0px">记住密码</el-checkbox>
+
+      <div v-if="loginType === 'account'" class="flex-space-between mb20">
+        <el-checkbox v-model="loginForm.rememberMe">记住密码</el-checkbox>
+        <div class="pointer text-blue login-forget">忘记密码？</div>
+      </div>
+
       <el-form-item style="width: 100%">
-        <el-button :loading="loading" size="medium" type="primary" style="width: 100%" @click.native.prevent="handleLogin">
+        <el-button class="login-btn" :loading="loading" size="medium" style="width: 100%" @click.native.prevent="handleLogin">
           <span v-if="!loading" native-type="submit">登 录</span>
           <span v-else>登 录 中...</span>
         </el-button>
-        <div style="float: right">
-          <button class="link-type" @click.prevent="getGiteeCode">Github授权登录</button>
-        </div>
       </el-form-item>
+      <div class="flex-space-around mb20">
+        <div class="pointer box" @click="switchLoginType('phone')">手机号登录</div>
+        <div class="pointer box">注册</div>
+      </div>
+      <el-divider>其他方式登录</el-divider>
+      <div class="flex-space-around mb20">
+        <svg-icon class="pointer" style="width: 30px; height: 30px" icon-class="github" @click="getGithubCode" />
+      </div>
     </el-form>
-    <!-- 手机号登录 -->
-    <el-form v-if="isMobile" ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form">
-      <h3 class="title">Gavin后台管理系统</h3>
-      <el-form-item prop="mobile">
-        <el-input v-model="loginForm.mobile" type="text" auto-complete="off" placeholder="手机号">
+
+    <!-- 账号注册 -->
+    <el-form v-if="loginType === 'register'" ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form">
+      <h3 class="fz-font title">中后台管理系统</h3>
+      <el-form-item prop="username">
+        <el-input v-model="loginForm.username" type="text" auto-complete="off" placeholder="手机号">
           <svg-icon slot="prefix" icon-class="user" class="el-input__icon input-icon" />
         </el-input>
       </el-form-item>
-      <el-form-item prop="verifyCode">
-        <el-input v-model="loginForm.verifyCode" auto-complete="off" placeholder="验证码" style="width: 63%">
+      <el-form-item prop="password">
+        <el-input v-model="loginForm.password" type="password" auto-complete="off" placeholder="密码" @keyup.enter.native="handleLogin">
+          <svg-icon slot="prefix" icon-class="password" class="el-input__icon input-icon" />
+        </el-input>
+      </el-form-item>
+      <el-form-item prop="code" v-if="captchaOnOff">
+        <el-input v-model="loginForm.code" auto-complete="off" placeholder="验证码" style="width: 63%" @keyup.enter.native="handleLogin">
           <svg-icon slot="prefix" icon-class="validCode" class="el-input__icon input-icon" />
         </el-input>
-        <div class="login-code" v-if="!computeTime">
-          <button type="button" @click="getVerify" class="pointer login-verify-code">获取验证码</button>
+        <div class="login-code">
+          <img :src="codeUrl" @click="getCode" class="login-code-img" />
         </div>
       </el-form-item>
-      <el-checkbox v-model="loginForm.rememberMe" style="margin: 0px 0px 25px 0px">记住密码</el-checkbox>
+
+      <div v-if="loginType === 'account'" class="flex-space-between mb20">
+        <el-checkbox v-model="loginForm.rememberMe">记住密码</el-checkbox>
+        <div class="pointer text-blue login-forget">忘记密码？</div>
+      </div>
+
       <el-form-item style="width: 100%">
-        <el-button :loading="loading" size="medium" type="primary" style="width: 100%" @click.native.prevent="handleSMSLogin">
+        <el-button class="login-btn" :loading="loading" size="medium" style="width: 100%" @click.native.prevent="handleSMSLogin">
           <span v-if="!loading" native-type="submit">登 录</span>
           <span v-else>登 录 中...</span>
         </el-button>
-        <div style="float: right">
-          <button class="link-type" @click.prevent="getGiteeCode">Github授权登录</button>
-        </div>
       </el-form-item>
+      <div class="flex-space-around mb20">
+        <div class="pointer box" @click="switchLoginType('phone')">手机号登录</div>
+        <div class="pointer box">注册</div>
+      </div>
+      <el-divider>其他方式登录</el-divider>
+      <div class="flex-space-around mb20">
+        <svg-icon class="pointer" style="width: 30px; height: 30px" icon-class="github" @click="getGithubCode" />
+      </div>
     </el-form>
 
     <!--  底部  -->
     <div class="el-login-footer">
-      <span>Copyright © 2018-2022 ruoyi.vip All Rights Reserved.</span>
+      <span>Copyright © 2018-{{ new Date().getFullYear() }} gavin.top All Rights Reserved.</span>
     </div>
   </div>
 </template>
 
 <script>
-import { getCodeImg, getGiteeCode, getSmsCode } from '@/api/login'
+import { getCodeImg, getGiteeCodeApi, getGithubApi, getSmsCode } from '@/api/login'
 import Cookies from 'js-cookie'
 import { encrypt, decrypt } from '@/utils/jsencrypt'
 import { getUrlParams } from '@/utils/index'
@@ -77,23 +140,30 @@ export default {
   name: 'Login',
   data() {
     return {
-      isMobile: true,
+      loginType: 'phone',
       codeUrl: '',
       loginForm: {
         username: 'admin',
         password: 'admin123',
         rememberMe: false,
         code: '',
+        uuid: ''
+      },
+      mobileLoginForm: {
+        mobile: '18826078154',
         uuid: '',
-        mobile: '',
         verifyCode: ''
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', message: '请输入您的账号' }],
         password: [{ required: true, trigger: 'blur', message: '请输入您的密码' }],
-        code: [{ required: true, trigger: 'change', message: '请输入验证码' }],
-        mobile: [{ required: true, trigger: 'blur', message: '请输入您的手机' }]
+        code: [{ required: true, trigger: 'change', message: '请输入验证码' }]
       },
+      mobileLoginRules: {
+        mobile: [{ required: true, trigger: 'blur', message: '请输入您的手机' }],
+        verifyCode: [{ required: true, trigger: 'trigger', message: '请输入验证码' }]
+      },
+      registerLoginForm: {},
       computeTime: false,
       loading: false,
       // 验证码开关
@@ -119,9 +189,11 @@ export default {
       const res = getUrlParams()
       const code = res?.code
       const uuid = res?.state
+
       console.log('🚀 >> created >> res:', res)
 
-      if (code) this.handleCodeLogin(code, uuid)
+      if (code && res.source !== 'github') this.handleCodeLogin(code, uuid)
+      if (code && res.source === 'github') this.handleGithubLogin(code, uuid)
     } catch (error) {}
   },
   methods: {
@@ -136,26 +208,24 @@ export default {
     },
     getVerify() {
       if (!this.computeTime) {
-        this.$refs.loginForm.validate(valid => {
-          if (valid) {
-            getSmsCode(this.loginForm.mobile).then(res => {
-              if (res.code === 200) {
-                this.$message({
-                  message: '验证码已发送',
-                  type: 'success'
-                })
-                this.loginForm.uuid = res.uuid
-                this.computeTime = 60
-                this.timer = setInterval(() => {
-                  this.computeTime--
-                  if (this.computeTime <= 0) {
-                    clearInterval(this.timer)
-                  }
-                }, 1000)
-              }
-            })
-          }
-        })
+        if (this.mobileLoginForm.mobile) {
+          getSmsCode(this.mobileLoginForm.mobile).then(res => {
+            if (res.code === 200) {
+              this.$message({
+                message: '验证码已发送',
+                type: 'success'
+              })
+              this.mobileLoginForm.uuid = res.uuid
+              this.computeTime = 60
+              this.timer = setInterval(() => {
+                this.computeTime--
+                if (this.computeTime <= 0) {
+                  clearInterval(this.timer)
+                }
+              }, 1000)
+            }
+          })
+        }
       }
     },
 
@@ -169,6 +239,11 @@ export default {
         rememberMe: rememberMe === undefined ? false : Boolean(rememberMe)
       }
     },
+
+    switchLoginType(type) {
+      this.loginType = type
+    },
+
     handleLogin() {
       this.$refs.loginForm.validate(valid => {
         if (valid) {
@@ -198,35 +273,65 @@ export default {
     },
 
     async getGiteeCode() {
-      const { authorizeUrl } = await getGiteeCode()
+      const { authorizeUrl } = await getGiteeCodeApi()
+      console.log('authorizeUrl', authorizeUrl)
+      window.location.href = authorizeUrl
+    },
+
+    async getGithubCode() {
+      const { authorizeUrl } = await getGithubApi()
       console.log('authorizeUrl', authorizeUrl)
       window.location.href = authorizeUrl
     },
 
     handleSMSLogin() {
-      this.loading = true
-      if (this.loginForm.rememberMe) {
-        Cookies.set('mobile', this.loginForm.mobile, { expires: 30 })
-        Cookies.set('rememberMe', this.loginForm.rememberMe, { expires: 30 })
-      } else {
-        Cookies.remove('mobile')
-        Cookies.remove('rememberMe')
-      }
+      this.$refs.mobileLoginForm.validate(valid => {
+        if (valid) {
+          this.loading = true
 
-      const smsLoginForm = {
-        mobile: this.loginForm.mobile,
-        smsCode: this.loginForm.verifyCode,
-        uuid: this.loginForm.uuid
-      }
+          const smsLoginForm = {
+            mobile: this.mobileLoginForm.mobile,
+            smsCode: this.mobileLoginForm.verifyCode,
+            uuid: this.mobileLoginForm.uuid
+          }
 
-      this.$store
-        .dispatch('SmsLogin', smsLoginForm)
-        .then(() => {
-          this.$router.push({ path: this.redirect || '/' }).catch(() => {})
+          this.$store
+            .dispatch('SmsLogin', smsLoginForm)
+            .then(() => {
+              this.$router.push({ path: this.redirect || '/' }).catch(() => {})
+            })
+            .catch(() => {
+              this.loading = false
+            })
+        }
+      })
+    },
+
+    handleGithubLogin(code, uuid) {
+      const loading = this.$loading({
+        lock: true,
+        text: ' 正在登录...',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      })
+
+      try {
+        const data = { code, uuid, source: 'github' }
+        this.$store.dispatch('GithubLogin', data).then(res => {
+          console.log('ThirdLogin success will go homePage', JSON.stringify(res))
+          this.$router.push({ path: this.redirect || '/' })
         })
-        .catch(() => {
-          this.loading = false
+      } catch (error) {
+        this.$message({
+          message: '授权登录失败,请重试',
+          type: 'error'
         })
+        setTimeout(() => {
+          window.location = '/login'
+        }, 500)
+      } finally {
+        loading.close()
+      }
     },
 
     handleCodeLogin(code, uuid) {
@@ -240,8 +345,8 @@ export default {
       try {
         const data = { code, uuid, source: 'gitee' }
         this.$store.dispatch('ThirdLogin', data).then(res => {
-          console.log('ThirdLogin sucess will go homePage', JSON.stringify(res))
-          this.$router.push({ path: '/' })
+          console.log('ThirdLogin success will go homePage', JSON.stringify(res))
+          this.$router.push({ path: this.redirect || '/' })
         })
       } catch (error) {
         this.$message({
@@ -266,7 +371,7 @@ export default {
   justify-content: center;
   align-items: center;
   height: 100%;
-  background-image: url('../assets/images/login-background.jpg');
+  background-image: url('../assets/images/login-background.png');
   background-size: cover;
 }
 .title {
@@ -276,10 +381,11 @@ export default {
 }
 
 .login-form {
-  border-radius: 6px;
+  border-radius: 13px;
   background: #ffffff;
   width: 400px;
   padding: 25px 25px 5px 25px;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
   .el-input {
     height: 38px;
     input {
@@ -306,6 +412,16 @@ export default {
     vertical-align: middle;
   }
 }
+
+.login-btn {
+  background-color: #3c76c8;
+  color: #fff;
+  &:hover {
+    background-color: lighten(#3c76c8, 10%);
+    color: #fff;
+  }
+}
+
 .el-login-footer {
   height: 40px;
   line-height: 40px;
@@ -322,9 +438,34 @@ export default {
   height: 38px;
 }
 
+.login-type {
+  margin-bottom: 20px;
+}
+
+.login-forget {
+  font-size: 14px;
+  &:hover {
+    color: lighten(#46a0ff, 10%);
+  }
+}
+
+.box {
+  width: 100px;
+  height: 30px;
+  text-align: center;
+  line-height: 30px;
+  font-size: 14px;
+  border: 1px solid #cececd;
+  border-radius: 6px;
+  &:hover {
+    color: #437ecb;
+    border: 1px solid #437ecb;
+  }
+}
+
 .login-verify-code {
-  height: 38px;
-  border: none;
-  background-color: #fefefe;
+  width: 100px;
+  white-space: nowrap;
+  text-align: center;
 }
 </style>

@@ -1,4 +1,4 @@
-import { login, logout, getInfo, loginGitee, smsLogin } from '@/api/login'
+import { login, logout, getInfo, loginGitee, smsLogin, loginGithub } from '@/api/login'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 
 const user = {
@@ -52,6 +52,22 @@ const user = {
     ThirdLogin({ commit }, data) {
       return new Promise((resolve, reject) => {
         loginGitee(data)
+          .then(res => {
+            console.log(`loginQR token ${res.token}`)
+            commit('SET_TOKEN', res.token)
+            setToken(res.token)
+            resolve('It is resolve')
+          })
+          .catch(error => {
+            reject(error)
+          })
+      })
+    },
+
+    // 第三方授权登录
+    GithubLogin({ commit }, data) {
+      return new Promise((resolve, reject) => {
+        loginGithub(data)
           .then(res => {
             console.log(`loginQR token ${res.token}`)
             commit('SET_TOKEN', res.token)

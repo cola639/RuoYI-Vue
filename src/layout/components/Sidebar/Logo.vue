@@ -43,7 +43,7 @@ export default {
   },
   data() {
     return {
-      title: 'admin管理系统',
+      title: 'gavin管理系统',
       logo: logoImg
     }
   }
