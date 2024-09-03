@@ -7,8 +7,8 @@ pipeline {
 
     // Defines environment variables that are accessible within the pipeline
     environment {
-        NETWORK = 'aaaa_backend'  // Network name for Docker to enable networking among containers
-        IMAGE_NAME = 'ruoyi-vue'  // Name of the Docker image to be built
+        NETWORK = 'web'  // Network name for Docker to enable networking among containers
+        IMAGE_NAME = 'admin-vue'  // Name of the Docker image to be built
         WS = "${WORKSPACE}"  // Shortcut for the Jenkins workspace variable
         PROFILE = 'prod'  // Build profile, typically used to differentiate environments
         NGINX = 'cola'  // Nginx container name, used for setting nginx configuration
