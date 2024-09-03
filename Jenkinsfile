@@ -7,7 +7,7 @@ pipeline {
 
     // Defines environment variables that are accessible within the pipeline
     environment {
-        NETWORK = 'ruoyi'  // Network name for Docker to enable networking among containers
+        NETWORK = 'aaaa_backend'  // Network name for Docker to enable networking among containers
         IMAGE_NAME = 'ruoyi-vue'  // Name of the Docker image to be built
         WS = "${WORKSPACE}"  // Shortcut for the Jenkins workspace variable
         PROFILE = 'prod'  // Build profile, typically used to differentiate environments
@@ -59,9 +59,9 @@ pipeline {
                 //    """
                 //  If 443 please place nginx configuration and certificate in the host/www/Docker/${NGINX} directory
                 sh """
-                    docker run -d --net ${NETWORK} -p 8888:80 \\
+                    docker run -d --net ${NETWORK} -p 8889:80 \\
                       --name ${IMAGE_NAME} \\
-                      -v /www/docker/${NGINX}/${NGINX}.conf:/etc/nginx/nginx.conf \\
+                      -v /www/docker/conf/${NGINX}.conf:/etc/nginx/nginx.conf \\
                       ${IMAGE_NAME}
                    """
             }
