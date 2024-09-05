@@ -61,6 +61,7 @@ pipeline {
                 sh """
                     docker run -d --net ${NETWORK} -p 8889:80 \\
                       --name ${IMAGE_NAME} \\
+                      --restart always \\
                       -v /www/docker/conf/${NGINX}.conf:/etc/nginx/nginx.conf \\
                       ${IMAGE_NAME}
                    """
