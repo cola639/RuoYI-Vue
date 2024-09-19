@@ -96,9 +96,9 @@ export function loginGithub(data) {
 }
 
 // 短信登录方法
-export function smsLogin(mobile, smsCode, uuid) {
+export function smsLogin(phone, smsCode, uuid) {
   const data = {
-    mobile,
+    phone,
     smsCode,
     uuid
   }
@@ -110,9 +110,9 @@ export function smsLogin(mobile, smsCode, uuid) {
 }
 
 // 发送短信验证码
-export function getSmsCode(mobile) {
+export function getSmsCode(phone) {
   const data = {
-    mobile
+    phone
   }
 
   return request({

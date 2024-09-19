@@ -123,12 +123,12 @@ const user = {
 
     // 短信登录
     SmsLogin({ commit }, userInfo) {
-      const mobile = userInfo.mobile.trim()
+      const phone = userInfo.phone.trim()
       const smsCode = userInfo.smsCode
       const uuid = userInfo.uuid
-      console.log('SmsLogin', mobile, smsCode, uuid)
+      console.log('SmsLogin', phone, smsCode, uuid)
       return new Promise((resolve, reject) => {
-        smsLogin(mobile, smsCode, uuid)
+        smsLogin(phone, smsCode, uuid)
           .then(res => {
             setToken(res.token)
             commit('SET_TOKEN', res.token)
