@@ -1,4 +1,4 @@
-import { login, logout, getInfo, loginGitee, smsLogin, loginGithub } from '@/api/login'
+import { login, logout, getInfo, loginGitee, smsLogin, smsRegister, loginGithub } from '@/api/login'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 
 const user = {
@@ -129,6 +129,25 @@ const user = {
       console.log('SmsLogin', mobile, smsCode, uuid)
       return new Promise((resolve, reject) => {
         smsLogin(mobile, smsCode, uuid)
+          .then(res => {
+            setToken(res.token)
+            commit('SET_TOKEN', res.token)
+            resolve()
+          })
+          .catch(error => {
+            reject(error)
+          })
+      })
+    },
+
+    // 短信登录
+    SMSRegister({ commit }, SMSRegisterForm) {
+      const phone = SMSRegisterForm.phone.trim()
+      const smsCode = SMSRegisterForm.smsCode
+      const uuid = SMSRegisterForm.uuid
+      console.log('smsRegister', phone, smsCode, uuid)
+      return new Promise((resolve, reject) => {
+        smsRegister(phone, smsCode, uuid)
           .then(res => {
             setToken(res.token)
             commit('SET_TOKEN', res.token)

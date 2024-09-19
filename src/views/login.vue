@@ -1,18 +1,18 @@
 <template>
   <div class="login">
     <!-- 手机号登录 -->
-    <el-form v-if="loginType === 'phone'" ref="mobileLoginForm" :model="mobileLoginForm" :rules="mobileLoginRules" class="login-form">
+    <el-form v-if="loginType === 'phone'" ref="phoneLoginForm" :model="phoneLoginForm" :rules="phoneLoginRules" class="login-form">
       <h3 class="fz-font title">中后台管理系统</h3>
-      <el-form-item prop="mobile">
-        <el-input v-model="mobileLoginForm.mobile" type="text" auto-complete="off" placeholder="手机号">
-          <svg-icon slot="prefix" icon-class="user" class="el-input__icon input-icon" />
+      <el-form-item prop="phone">
+        <el-input v-model="phoneLoginForm.phone" type="text" auto-complete="off" placeholder="手机号">
+          <svg-icon slot="prefix" icon-class="phone" class="el-input__icon input-icon" />
         </el-input>
       </el-form-item>
       <el-form-item prop="verifyCode">
-        <el-input v-model="mobileLoginForm.verifyCode" auto-complete="off" placeholder="验证码">
+        <el-input v-model="phoneLoginForm.verifyCode" auto-complete="off" placeholder="验证码">
           <svg-icon slot="prefix" icon-class="validCode" class="el-input__icon input-icon" />
           <div v-if="!computeTime" class="pointer" slot="append" @click="getVerify">获取验证码</div>
-          <div v-if="computeTime" class="pointer login-verify-code" slot="append" @click="getVerify">{{ computeTime }} S</div>
+          <div v-if="computeTime" class="pointer login-verify-code" slot="append">{{ computeTime }} S</div>
         </el-input>
       </el-form-item>
       <div v-if="loginType === 'account'" class="flex-space-between mb20">
@@ -27,8 +27,8 @@
         </el-button>
       </el-form-item>
       <div class="flex-space-around mb20">
-        <div class="pointer box" @click="switchLoginType('account')">账号密码</div>
-        <div class="pointer box">注册</div>
+        <div class="pointer box" @click.prevent="switchLoginType('account')">账号密码</div>
+        <div class="pointer box" @click.prevent="switchLoginType('register')">注册</div>
       </div>
       <el-divider>其他方式登录</el-divider>
       <div class="flex-space-around mb20">
@@ -71,67 +71,59 @@
         </el-button>
       </el-form-item>
       <div class="flex-space-around mb20">
-        <div class="pointer box" @click="switchLoginType('phone')">手机号登录</div>
-        <div class="pointer box">注册</div>
+        <div class="pointer box" @click.prevent="switchLoginType('phone')">手机号登录</div>
+        <div class="pointer box" @click.prevent="switchLoginType('register')">注册</div>
       </div>
       <el-divider>其他方式登录</el-divider>
       <div class="flex-space-around mb20">
         <svg-icon class="pointer" style="width: 30px; height: 30px" icon-class="github" @click="getGithubCode" />
+        <svg-icon class="pointer" style="width: 30px; height: 30px" icon-class="gitee" @click="getGiteeCode" />
       </div>
     </el-form>
 
     <!-- 账号注册 -->
-    <el-form v-if="loginType === 'register'" ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form">
+    <el-form v-if="loginType === 'register'" ref="SMSRegisterForm" :model="SMSRegisterForm" :rules="SMSRegisterFormRules" class="login-form">
       <h3 class="fz-font title">中后台管理系统</h3>
-      <el-form-item prop="username">
-        <el-input v-model="loginForm.username" type="text" auto-complete="off" placeholder="手机号">
-          <svg-icon slot="prefix" icon-class="user" class="el-input__icon input-icon" />
+      <el-form-item prop="phone">
+        <el-input v-model="SMSRegisterForm.phone" type="text" auto-complete="off" placeholder="手机号">
+          <svg-icon slot="prefix" icon-class="phone" class="el-input__icon input-icon" />
         </el-input>
       </el-form-item>
-      <el-form-item prop="password">
-        <el-input v-model="loginForm.password" type="password" auto-complete="off" placeholder="密码" @keyup.enter.native="handleLogin">
-          <svg-icon slot="prefix" icon-class="password" class="el-input__icon input-icon" />
-        </el-input>
-      </el-form-item>
-      <el-form-item prop="code" v-if="captchaOnOff">
-        <el-input v-model="loginForm.code" auto-complete="off" placeholder="验证码" style="width: 63%" @keyup.enter.native="handleLogin">
+      <el-form-item prop="verifyCode">
+        <el-input v-model="SMSRegisterForm.verifyCode" auto-complete="off" placeholder="验证码">
           <svg-icon slot="prefix" icon-class="validCode" class="el-input__icon input-icon" />
+          <div v-if="!computeTime" class="pointer" slot="append" @click="getRegisterVerify">获取验证码</div>
+          <div v-if="computeTime" class="pointer login-verify-code" slot="append">{{ computeTime }} S</div>
         </el-input>
-        <div class="login-code">
-          <img :src="codeUrl" @click="getCode" class="login-code-img" />
-        </div>
       </el-form-item>
-
       <div v-if="loginType === 'account'" class="flex-space-between mb20">
         <el-checkbox v-model="loginForm.rememberMe">记住密码</el-checkbox>
         <div class="pointer text-blue login-forget">忘记密码？</div>
       </div>
 
       <el-form-item style="width: 100%">
-        <el-button class="login-btn" :loading="loading" size="medium" style="width: 100%" @click.native.prevent="handleSMSLogin">
-          <span v-if="!loading" native-type="submit">登 录</span>
-          <span v-else>登 录 中...</span>
+        <el-button class="login-btn" :loading="loading" size="medium" style="width: 100%" @click.prevent="handleSMSRegister">
+          <span v-if="!loading" native-type="submit">注 册</span>
+          <span v-else>注 册 中...</span>
         </el-button>
       </el-form-item>
-      <div class="flex-space-around mb20">
-        <div class="pointer box" @click="switchLoginType('phone')">手机号登录</div>
-        <div class="pointer box">注册</div>
-      </div>
+      <el-button class="register-btn" size="medium" style="width: 100%" @click.prevent="switchLoginType('phone')"> 返回登录 </el-button>
       <el-divider>其他方式登录</el-divider>
       <div class="flex-space-around mb20">
         <svg-icon class="pointer" style="width: 30px; height: 30px" icon-class="github" @click="getGithubCode" />
+        <svg-icon class="pointer" style="width: 30px; height: 30px" icon-class="gitee" @click="getGiteeCode" />
       </div>
     </el-form>
 
     <!--  底部  -->
     <div class="el-login-footer">
-      <span>Copyright © 2018-{{ new Date().getFullYear() }} gavin.top All Rights Reserved.</span>
+      <span>Copyright © 2018-{{ new Date().getFullYear() }} gavin All Rights Reserved.</span>
     </div>
   </div>
 </template>
 
 <script>
-import { getCodeImg, getGiteeCodeApi, getGithubApi, getSmsCode } from '@/api/login'
+import { getCodeImg, getGiteeCodeApi, getGithubApi, getRegisterCode, getSmsCode } from '@/api/login'
 import Cookies from 'js-cookie'
 import { encrypt, decrypt } from '@/utils/jsencrypt'
 import { getUrlParams } from '@/utils/index'
@@ -149,8 +141,13 @@ export default {
         code: '',
         uuid: ''
       },
-      mobileLoginForm: {
-        mobile: '18826078154',
+      phoneLoginForm: {
+        phone: '18826078154',
+        uuid: '',
+        verifyCode: ''
+      },
+      SMSRegisterForm: {
+        phone: '18826078154',
         uuid: '',
         verifyCode: ''
       },
@@ -159,8 +156,12 @@ export default {
         password: [{ required: true, trigger: 'blur', message: '请输入您的密码' }],
         code: [{ required: true, trigger: 'change', message: '请输入验证码' }]
       },
-      mobileLoginRules: {
-        mobile: [{ required: true, trigger: 'blur', message: '请输入您的手机' }],
+      phoneLoginRules: {
+        phone: [{ required: true, trigger: 'blur', message: '请输入您的手机' }],
+        verifyCode: [{ required: true, trigger: 'trigger', message: '请输入验证码' }]
+      },
+      SMSRegisterFormRules: {
+        phone: [{ required: true, trigger: 'blur', message: '请输入您的手机' }],
         verifyCode: [{ required: true, trigger: 'trigger', message: '请输入验证码' }]
       },
       registerLoginForm: {},
@@ -192,7 +193,7 @@ export default {
 
       console.log('🚀 >> created >> res:', res)
 
-      if (code && res.source !== 'github') this.handleCodeLogin(code, uuid)
+      if (code && res.source !== 'github') this.handleGiteeLogin(code, uuid)
       if (code && res.source === 'github') this.handleGithubLogin(code, uuid)
     } catch (error) {}
   },
@@ -208,14 +209,36 @@ export default {
     },
     getVerify() {
       if (!this.computeTime) {
-        if (this.mobileLoginForm.mobile) {
-          getSmsCode(this.mobileLoginForm.mobile).then(res => {
+        if (this.phoneLoginForm.phone) {
+          getSmsCode(this.phoneLoginForm.phone).then(res => {
             if (res.code === 200) {
               this.$message({
                 message: '验证码已发送',
                 type: 'success'
               })
-              this.mobileLoginForm.uuid = res.uuid
+              this.phoneLoginForm.uuid = res.uuid
+              this.computeTime = 60
+              this.timer = setInterval(() => {
+                this.computeTime--
+                if (this.computeTime <= 0) {
+                  clearInterval(this.timer)
+                }
+              }, 1000)
+            }
+          })
+        }
+      }
+    },
+    getRegisterVerify() {
+      if (!this.computeTime) {
+        if (this.SMSRegisterForm.phone) {
+          getRegisterCode(this.SMSRegisterForm.phone).then(res => {
+            if (res.code === 200) {
+              this.$message({
+                message: '验证码已发送',
+                type: 'success'
+              })
+              this.SMSRegisterForm.uuid = res.uuid
               this.computeTime = 60
               this.timer = setInterval(() => {
                 this.computeTime--
@@ -241,7 +264,10 @@ export default {
     },
 
     switchLoginType(type) {
-      this.loginType = type
+      this.loginType = '' // 清空当前的 loginType
+      this.$nextTick(() => {
+        this.loginType = type // 在下一个 DOM 更新周期中设置新的 loginType
+      })
     },
 
     handleLogin() {
@@ -285,18 +311,41 @@ export default {
     },
 
     handleSMSLogin() {
-      this.$refs.mobileLoginForm.validate(valid => {
+      this.$refs.phoneLoginForm.validate(valid => {
         if (valid) {
           this.loading = true
 
           const smsLoginForm = {
-            mobile: this.mobileLoginForm.mobile,
-            smsCode: this.mobileLoginForm.verifyCode,
-            uuid: this.mobileLoginForm.uuid
+            phone: this.phoneLoginForm.phone,
+            smsCode: this.phoneLoginForm.verifyCode,
+            uuid: this.phoneLoginForm.uuid
           }
 
           this.$store
             .dispatch('SmsLogin', smsLoginForm)
+            .then(() => {
+              this.$router.push({ path: this.redirect || '/' }).catch(() => {})
+            })
+            .catch(() => {
+              this.loading = false
+            })
+        }
+      })
+    },
+
+    handleSMSRegister() {
+      this.$refs.SMSRegisterForm.validate(valid => {
+        if (valid) {
+          this.loading = true
+
+          const SMSRegisterForm = {
+            phone: this.SMSRegisterForm.phone,
+            smsCode: this.SMSRegisterForm.verifyCode,
+            uuid: this.SMSRegisterForm.uuid
+          }
+
+          this.$store
+            .dispatch('SMSRegister', SMSRegisterForm)
             .then(() => {
               this.$router.push({ path: this.redirect || '/' }).catch(() => {})
             })
@@ -334,7 +383,7 @@ export default {
       }
     },
 
-    handleCodeLogin(code, uuid) {
+    handleGiteeLogin(code, uuid) {
       const loading = this.$loading({
         lock: true,
         text: ' 正在登录...',
@@ -419,6 +468,14 @@ export default {
   &:hover {
     background-color: lighten(#3c76c8, 10%);
     color: #fff;
+  }
+}
+
+.register-btn {
+  background-color: #fefefe;
+  color: #000;
+  &:hover {
+    background-color: lighten(#fefefe, 10%);
   }
 }
 

@@ -18,8 +18,14 @@ export function login(username, password, code, uuid) {
   })
 }
 
-// 注册方法
-export function register(data) {
+// 短信注册方法
+export function smsRegister(phone, smsCode, uuid) {
+  const data = {
+    phone,
+    smsCode,
+    uuid
+  }
+
   return request({
     url: '/register',
     headers: {
@@ -111,6 +117,19 @@ export function getSmsCode(mobile) {
 
   return request({
     url: '/sms/code',
+    method: 'post',
+    data: data
+  })
+}
+
+// 注册验证码
+export function getRegisterCode(phone) {
+  const data = {
+    phone
+  }
+
+  return request({
+    url: '/sms/register',
     method: 'post',
     data: data
   })
