@@ -58,6 +58,7 @@ pipeline {
                 //       ${IMAGE_NAME}
                 //    """
                 //  If 443 please place nginx configuration and certificate in the host/www/Docker/${NGINX} directory
+                // 宿主机/www/docker/conf/${NGINX}.conf 移动到该容器的/etc/nginx/nginx.conf
                 sh """
                     docker run -d --net ${NETWORK} -p 8889:80 \\
                       --name ${IMAGE_NAME} \\
